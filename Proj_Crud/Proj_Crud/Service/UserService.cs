@@ -14,7 +14,7 @@ public class UserService : IUserService
         _usersStorage = usersStorage;
     }
 
-    public User AddUser(User user)
+    public void AddUser(User user)
     {
         if (string.IsNullOrEmpty(user.Username))
         {
@@ -26,7 +26,6 @@ public class UserService : IUserService
         }
         
         _usersStorage.Users.Add(user);
-        return user;
     }
     
     public User GetUserByID(Guid id)
@@ -35,5 +34,12 @@ public class UserService : IUserService
         if (user == null) throw new NotFoundException("User not found");
         
         return user;
+    }
+    
+    public void DeleteUser(Guid id)
+    {
+        var user = _usersStorage.Users.FirstOrDefault(x => x.Id == id);
+        if (user == null) throw new NotFoundException("User not found");
+        _usersStorage.Users.Remove(user);
     }
 }

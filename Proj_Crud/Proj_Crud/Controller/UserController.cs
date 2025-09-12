@@ -27,12 +27,12 @@ public class UsersController : ControllerBase
     return Ok(_usersStorage.Users);
   }
 
-  [HttpGet("{id}")]
-  public IActionResult GetUser(Guid id)
+  [HttpGet("{userId}")]
+  public IActionResult GetUser(Guid userId)
   {
       try
       {
-          var user = _usersInterface.GetUserByID(id);
+          var user = _usersInterface.GetUserByID(userId);
           return Ok(user);
       }
 
@@ -55,6 +55,21 @@ public class UsersController : ControllerBase
       {
           Console.WriteLine("Add user failed");
           return BadRequest(ex.Message);
+      }
+  }
+
+  [HttpDelete("{userId}")]
+  public IActionResult DeleteUser(Guid userId)
+  {
+      try
+      {
+        _usersInterface.DeleteUser(userId);
+        return NoContent();
+      }
+      catch (Exception ex)
+      {
+          Console.WriteLine(ex.Message);
+          return StatusCode(404);
       }
   }
 }

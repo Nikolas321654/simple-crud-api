@@ -3,6 +3,7 @@ using Proj_Crud.Model;
 
 public interface IUserService
 {
-    public User AddUser(User user);
+    public void AddUser(User user);
     public User GetUserByID(Guid id);
+    public void DeleteUser(Guid id);
 }
