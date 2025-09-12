@@ -6,6 +6,6 @@ public class UsersStorage
 
     public UsersStorage()
     {
-        Users = new List<User>();
+        Users = new List<User>(){ };
     }
 }
