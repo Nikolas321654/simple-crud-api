@@ -4,72 +4,85 @@ using Proj_Crud.Model;
 using Proj_Crud.Helpers;
 using Proj_Crud.Interfaces;
 
-
 namespace Proj_Crud.Controller;
 
 [Route("/api/[controller]")]
 [ApiController]
-
 public class UsersController : ControllerBase
 {
-  private readonly UsersStorage _usersStorage;
-  private readonly IUserService _usersInterface;
+    private readonly IUserService _usersInterface;
+    private readonly ILogger<UsersController> _logger;
 
-  public UsersController(UsersStorage usersStorage, IUserService usersInterface)
-  {
-    _usersStorage = usersStorage;
-    _usersInterface = usersInterface;
-  }
-  
-  [HttpGet]
-  public IActionResult GetAllUsers()
-  {
-    return Ok(_usersStorage.Users);
-  }
+    public UsersController(IUserService usersInterface, ILogger<UsersController> logger)
+    {
+        _usersInterface = usersInterface;
+        _logger = logger;
+    }
 
-  [HttpGet("{userId}")]
-  public IActionResult GetUser(Guid userId)
-  {
-      try
-      {
-          var user = _usersInterface.GetUserByID(userId);
-          return Ok(user);
-      }
+    [HttpGet]
+    public IActionResult GetAllUsers()
+    {
+        return Ok(_usersInterface.GetAllUsers());
+    }
 
-      catch (NotFoundException ex)
-      {
-          Console.WriteLine(ex.Message);
-          return NotFound(ex.Message);
-      }
-  }
+    [HttpGet("{userId}")]
+    public IActionResult GetUser(Guid userId)
+    {
+        try
+        {
+            var user = _usersInterface.GetUserById(userId);
+            return Ok(user);
+        }
 
-  [HttpPost]
-  public IActionResult CreateUser([FromBody] User user)
-  {
-      try
-      {
-          _usersInterface.AddUser(user);
-          return Created("", user);
-      }
-      catch (Exception ex)
-      {
-          Console.WriteLine("Add user failed");
-          return BadRequest(ex.Message);
-      }
-  }
+        catch (NotFoundException ex)
+        {
+            _logger.LogError($"User with ID {userId} not found");
+            return NotFound(ex.Message);
+        }
+    }
 
-  [HttpDelete("{userId}")]
-  public IActionResult DeleteUser(Guid userId)
-  {
-      try
-      {
-        _usersInterface.DeleteUser(userId);
-        return NoContent();
-      }
-      catch (Exception ex)
-      {
-          Console.WriteLine(ex.Message);
-          return StatusCode(404);
-      }
-  }
+    [HttpPost]
+    public IActionResult CreateUser([FromBody] User user)
+    {
+        try
+        {
+            _usersInterface.AddUser(user);
+            return Created("", user);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Add user failed, user id: {user.Id}");
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPut("{userId}")]
+    public IActionResult UpdateUser([FromBody] User newUserData, Guid userId)
+    {
+        try
+        {
+            _usersInterface.UpdateUser(newUserData, userId);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Update user failed, user id {userId} not found");
+            return NotFound(ex.Message);
+        }
+    }
+
+    [HttpDelete("{userId}")]
+    public IActionResult DeleteUser(Guid userId)
+    {
+        try
+        {
+            _usersInterface.DeleteUser(userId);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Delete user failed, user id {userId} not found");
+            return NotFound(ex.Message);
+        }
+    }
 }
